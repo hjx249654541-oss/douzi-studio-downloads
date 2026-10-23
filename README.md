@@ -1,11 +1,17 @@
 # 逗子制片所下载
 
-这里提供逗子制片所安装包，源码仓库保持私有。
+## Windows x64 + CLI 测试版
 
-## Mac 下载
+[下载页面](https://github.com/hjx249654541-oss/douzi-studio-downloads/releases/tag/windows-cli-preview-20261023)
 
-前往 [版本下载页面](https://github.com/hjx249654541-oss/douzi-studio-downloads/releases/tag/canvas-preview-20261023) 下载 ZIP，解压后将逗子制片所.app 放入 Applications。
+下载完整 ZIP，解压后运行“逗子制片所.exe”。不要在 ZIP 中运行，不要只复制 EXE。
 
-当前版本适用于 Apple Silicon（M 系列芯片）Mac，不适用于 Intel Mac 或 Windows。此版本为预览版，尚未完成 Apple 开发者签名与公证。AI 生成需要自行配置可用的服务/API；安装包不包含账号密钥或额度。
+本版本未签名，尚未在真实 Windows 电脑完成运行验收。可能出现未知发布者/SmartScreen 提示；遇到拦截请记录并反馈，不要求关闭系统安全保护。
 
-已验证便笺、连线、媒体导入与保存、项目包导出恢复。长视频性能和复杂历史项目尚未全面验证。
+CLI 需要 Node.js 20 或更新版本；图形界面不需额外安装 Node.js。详见 [CLI 使用说明](docs/CLI.md) 与 [全部动作参数](docs/CLI-ACTIONS.md)。
+
+该仓库仅提供下载和使用文档，原源码仓库保持私有。安装包不包含 API 密钥或额度。
+
+## Mac 状态
+
+此前 Mac 预览包已发现签名与公证问题，暂不建议向客户安装。Mac 修订版尚未通过严格分发验收，不代表 M4 客户电脑可正常打开。
