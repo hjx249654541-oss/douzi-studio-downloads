@@ -1,0 +1,34 @@
+name: Assemble Windows runtime preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: hjx249654541-oss/douzi-studio-downloads
+    steps:
+      - name: Download uploaded parts
+        run: gh release download windows-runtime-upload-4aa554b --dir parts --pattern 'runtime.part*'
+      - name: Assemble and verify complete ZIP
+        shell: python
+        run: |
+          import pathlib, hashlib, zipfile
+          parts = sorted(pathlib.Path('parts').glob('runtime.part*'))
+          assert len(parts) == 24, len(parts)
+          output = pathlib.Path('Douzi-Studio-Windows-x64-Runtime-test-20261024.zip')
+          with output.open('wb') as target:
+              for part in parts:
+                  target.write(part.read_bytes())
+          digest = hashlib.sha256(output.read_bytes()).hexdigest()
+          assert digest == 'ef73bd0bcec31da62f2091f228e62c9ca4acd5532c331cba01127b58a40cfd43', digest
+          with zipfile.ZipFile(output) as z:
+              assert z.testzip() is None
+              assert 'douzi-cli.cmd' in z.namelist()
+              assert 'resources/app/resources/bin/win32-x64/ffmpeg.exe' in z.namelist()
+              assert 'resources/app/resources/skills/microfilm-video-pipeline/SKILL.md' in z.namelist()
+          pathlib.Path('SHA256SUMS-Windows.txt').write_text(digest + '  ' + output.name + '\n')
+      - name: Upload verified test package
+        run: gh release upload windows-runtime-preview-20261024 Douzi-Studio-Windows-x64-Runtime-test-20261024.zip SHA256SUMS-Windows.txt --clobber
