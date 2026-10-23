@@ -1,0 +1,29 @@
+name: Assemble published installer
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: hjx249654541-oss/douzi-studio-downloads
+    steps:
+      - name: Download temporary installer parts
+        run: gh release download upload-staging-8575fb7 --dir parts --pattern 'package.part*'
+      - name: Assemble and verify installer
+        shell: python
+        run: |
+          import pathlib, hashlib
+          parts = sorted(pathlib.Path('parts').glob('package.part*'))
+          assert len(parts) == 16, len(parts)
+          output = pathlib.Path('Douzi-Studio-macOS-Apple-Silicon-8575fb7.zip')
+          with output.open('wb') as f:
+              for part in parts:
+                  f.write(part.read_bytes())
+          digest = hashlib.sha256(output.read_bytes()).hexdigest()
+          assert digest == 'a7c116f7fb0176d60c915b56b7234566f3f071912c98399046cb2da68f697634', digest
+          pathlib.Path('SHA256SUMS.txt').write_text(digest + '  ' + output.name + '\n')
+      - name: Publish verified installer
+        run: gh release upload canvas-preview-20261023 Douzi-Studio-macOS-Apple-Silicon-8575fb7.zip SHA256SUMS.txt
