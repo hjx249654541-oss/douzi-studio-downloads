@@ -1,0 +1,29 @@
+name: Assemble Windows CLI preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: hjx249654541-oss/douzi-studio-downloads
+    steps:
+      - name: Download uploaded parts
+        run: gh release download windows-upload-61f5e81 --dir parts --pattern 'windows.part*'
+      - name: Assemble and verify
+        shell: python
+        run: |
+          import pathlib, hashlib
+          parts = sorted(pathlib.Path('parts').glob('windows.part*'))
+          assert len(parts) == 18, len(parts)
+          output = pathlib.Path('Douzi-Studio-Windows-x64-CLI-test-20261023.zip')
+          with output.open('wb') as target:
+              for part in parts:
+                  target.write(part.read_bytes())
+          digest = hashlib.sha256(output.read_bytes()).hexdigest()
+          assert digest == 'fab2ce4066e8ccb6b4e9c36173c2f74151e596be12170d996479d27ada24625c', digest
+          pathlib.Path('SHA256SUMS-Windows.txt').write_text(digest + '  ' + output.name + '\n')
+      - name: Publish verified Windows ZIP
+        run: gh release upload windows-cli-preview-20261023 Douzi-Studio-Windows-x64-CLI-test-20261023.zip SHA256SUMS-Windows.txt
