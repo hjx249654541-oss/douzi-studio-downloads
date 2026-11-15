@@ -15,7 +15,7 @@ jobs:
       - name: Assemble and verify ZIP
         shell: python
         run: |
-          import pathlib, hashlib, zipfile
+          import pathlib, hashlib, zipfile, unicodedata
           parts = sorted(pathlib.Path('parts').glob('mac.part*'))
           assert len(parts) == 25, len(parts)
           output = pathlib.Path('Douzi-Studio-mac-arm64-preview-20261115-bde4c5c.zip')
@@ -26,7 +26,7 @@ jobs:
           assert digest == 'fd7ccfcc11978e286eb40edbd7f953be938268d42d238d7dba253b27816c9d77', digest
           with zipfile.ZipFile(output) as z:
               assert z.testzip() is None
-              assert any(n.endswith('/Contents/MacOS/逗子制片所') for n in z.namelist())
+              assert any(unicodedata.normalize('NFC', n).endswith('/Contents/MacOS/逗子制片所') for n in z.namelist())
               assert any(n.endswith('/Contents/Resources/app/server/agnes-proxy.mjs') for n in z.namelist())
           pathlib.Path('SHA256SUMS.txt').write_text(digest + '  ' + output.name + '\n')
       - name: Upload verified package to draft
